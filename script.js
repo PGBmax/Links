@@ -1,119 +1,7 @@
 'use strict';
 
 /* ══════════════════════════════════════
-   STARFIELD — warm-tinted stars
-══════════════════════════════════════ */
-const canvas = document.getElementById('starfield');
-const ctx    = canvas.getContext('2d');
-let W, H, stars = [], shooters = [];
-
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  buildStars();
-}
-
-/* Star colors: warm whites, gold hints, pale orange */
-const starColors = [
-  [255, 240, 220],
-  [255, 230, 200],
-  [255, 220, 180],
-  [255, 210, 160],
-  [255, 245, 235],
-  [255, 200, 140],
-];
-
-function buildStars() {
-  stars = [];
-  const n = Math.round(W * H / 3000);
-  for (let i = 0; i < n; i++) {
-    const c = starColors[Math.floor(Math.random() * starColors.length)];
-    stars.push({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      r:  Math.random() * 1.3 + 0.15,
-      a:  Math.random(),
-      da: (Math.random() - 0.5) * 0.015,
-      c,
-    });
-  }
-}
-
-function spawnShooter() {
-  const angle = (Math.random() * 30 + 8) * Math.PI / 180;
-  const fromRight = Math.random() > 0.5;
-  shooters.push({
-    x:     fromRight ? W * (0.3 + Math.random() * 0.7) : Math.random() * W * 0.7,
-    y:     Math.random() * H * 0.45,
-    vx:    (fromRight ? -1 : 1) * Math.cos(angle) * (Math.random() * 7 + 7),
-    vy:    Math.sin(angle) * (Math.random() * 7 + 7),
-    len:   Math.random() * 100 + 70,
-    alpha: 1,
-  });
-}
-
-function drawFrame() {
-  ctx.clearRect(0, 0, W, H);
-
-  /* stars */
-  for (const s of stars) {
-    s.a += s.da;
-    if (s.a <= 0.05 || s.a >= 1) s.da *= -1;
-    s.a = Math.max(0.05, Math.min(1, s.a));
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${s.c[0]},${s.c[1]},${s.c[2]},${s.a})`;
-    ctx.fill();
-  }
-
-  /* shooting stars — golden streaks */
-  for (let i = shooters.length - 1; i >= 0; i--) {
-    const s  = shooters[i];
-    s.x     += s.vx;
-    s.y     += s.vy;
-    s.alpha -= 0.012;
-    if (s.alpha <= 0 || s.x < -80 || s.x > W + 80 || s.y > H + 80) {
-      shooters.splice(i, 1); continue;
-    }
-
-    const speed = Math.hypot(s.vx, s.vy);
-    const tailX = s.x - (s.vx / speed) * s.len;
-    const tailY = s.y - (s.vy / speed) * s.len;
-
-    const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
-    grad.addColorStop(0, `rgba(255,200,100,0)`);
-    grad.addColorStop(0.6, `rgba(255,180,60,${s.alpha * 0.4})`);
-    grad.addColorStop(1, `rgba(255,220,140,${s.alpha})`);
-
-    ctx.beginPath();
-    ctx.moveTo(tailX, tailY);
-    ctx.lineTo(s.x, s.y);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth   = 1.6;
-    ctx.stroke();
-
-    /* bright head */
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,230,160,${s.alpha})`;
-    ctx.fill();
-  }
-
-  requestAnimationFrame(drawFrame);
-}
-
-window.addEventListener('resize', resize);
-resize();
-drawFrame();
-
-/* Spawn shooting stars every 3-7s */
-setInterval(() => {
-  if (Math.random() > 0.3) spawnShooter();
-}, 3500);
-setTimeout(spawnShooter, 2000);
-
-/* ══════════════════════════════════════
-   SOLAR EMBERS — floating warm particles
+   WARM EMBERS — subtle floating particles
 ══════════════════════════════════════ */
 const emberColors = [
   'rgba(240,168,48,',
@@ -121,26 +9,25 @@ const emberColors = [
   'rgba(255,200,100,',
   'rgba(200,120,20,',
   'rgba(255,180,60,',
-  'rgba(180,100,30,',
 ];
 
-for (let i = 0; i < 22; i++) {
-  const sz    = (Math.random() * 2.5 + 0.6).toFixed(1);
+for (let i = 0; i < 14; i++) {
+  const sz    = (Math.random() * 2 + 0.4).toFixed(1);
   const c     = emberColors[i % emberColors.length];
-  const op    = (Math.random() * 0.3 + 0.1).toFixed(2);
-  const dur   = (Math.random() * 20 + 12).toFixed(1);
-  const delay = (Math.random() * 8).toFixed(1);
-  const dx1   = (Math.random() * 70 - 35).toFixed(0);
-  const dy1   = (Math.random() * 70 - 35).toFixed(0);
-  const dx2   = (Math.random() * 90 - 45).toFixed(0);
-  const dy2   = (Math.random() * 90 - 45).toFixed(0);
+  const op    = (Math.random() * 0.2 + 0.05).toFixed(2);
+  const dur   = (Math.random() * 25 + 15).toFixed(1);
+  const delay = (Math.random() * 10).toFixed(1);
+  const dx1   = (Math.random() * 50 - 25).toFixed(0);
+  const dy1   = (Math.random() * 50 - 25).toFixed(0);
+  const dx2   = (Math.random() * 60 - 30).toFixed(0);
+  const dy2   = (Math.random() * 60 - 30).toFixed(0);
   const name  = `ember${i}`;
 
   const ks = document.createElement('style');
   ks.textContent = `@keyframes ${name}{
     0%{transform:translate(0,0);opacity:${op}}
-    50%{transform:translate(${dx1}px,${dy1}px);opacity:${Math.min(1, +op + 0.15).toFixed(2)}}
-    100%{transform:translate(${dx2}px,${dy2}px);opacity:${Math.max(0, +op - 0.05).toFixed(2)}}
+    50%{transform:translate(${dx1}px,${dy1}px);opacity:${Math.min(1, +op + 0.1).toFixed(2)}}
+    100%{transform:translate(${dx2}px,${dy2}px);opacity:${Math.max(0, +op - 0.03).toFixed(2)}}
   }`;
   document.head.appendChild(ks);
 
@@ -152,8 +39,8 @@ for (let i = 0; i < 22; i++) {
     `left:${(Math.random() * 100).toFixed(1)}vw`,
     `top:${(Math.random() * 100).toFixed(1)}vh`,
     `background:${c}${op})`,
-    `box-shadow:0 0 ${+sz * 3}px ${c}0.3)`,
-    'z-index:2', 'pointer-events:none',
+    `box-shadow:0 0 ${+sz * 2}px ${c}0.15)`,
+    'z-index:1', 'pointer-events:none',
     `animation:${name} ${dur}s ease-in-out ${delay}s infinite alternate`,
   ].join(';');
   document.body.appendChild(el);
@@ -226,7 +113,7 @@ function toggleCode(e, btn) {
 }
 
 /* ══════════════════════════════════════
-   TYPING BIO — warm emoji
+   TYPING BIO
 ══════════════════════════════════════ */
 const bioEl   = document.getElementById('bio');
 const bioText = "Étudiant à l'École 42 · 19 ans · Dev en devenir ☀️";
@@ -238,20 +125,51 @@ function typeNext() {
     idx++;
     setTimeout(typeNext, idx === 1 ? 600 : Math.random() * 50 + 30);
   } else {
-    /* Remove typing cursor after done */
     setTimeout(() => bioEl.classList.remove('typing'), 800);
   }
 }
 
-setTimeout(typeNext, 1200);
+setTimeout(typeNext, 1000);
 
-/* ══════════════════════════════════════
-   PARALLAX SUN on scroll
-══════════════════════════════════════ */
-const sunEl = document.getElementById('sun');
-if (sunEl) {
-  window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    sunEl.style.transform = `translateX(-50%) translateY(${scrollY * 0.15}px) scale(${0.92 + Math.sin(Date.now() / 3000) * 0.08})`;
-  }, { passive: true });
+/* ═══════════════  CUB3D WASM OVERLAY  ═══════════════ */
+let cub3dLoaded = false;
+
+function openCub3D() {
+  const overlay = document.getElementById('cub3d-overlay');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  if (!cub3dLoaded) {
+    const loading = document.getElementById('cub3d-loading');
+    loading.style.display = 'flex';
+
+    window.Module = {
+      canvas: document.getElementById('canvas'),
+      onRuntimeInitialized: function() {
+        /* Loading spinner is hidden from C code via EM_ASM */
+        cub3dLoaded = true;
+      },
+      print: function(text) { console.log('[cub3D]', text); },
+      printErr: function(text) { console.warn('[cub3D]', text); }
+    };
+
+    const script = document.createElement('script');
+    script.src = 'cub3d.js';
+    script.async = true;
+    script.onerror = function() {
+      loading.innerHTML = '<span style="color:var(--flare)">Erreur de chargement du module WASM</span>';
+    };
+    document.body.appendChild(script);
+  }
 }
+
+function closeCub3D() {
+  document.getElementById('cub3d-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('cub3d-overlay').style.display === 'flex') {
+    closeCub3D();
+  }
+});
