@@ -145,12 +145,22 @@ function openCub3D() {
 
     window.Module = {
       canvas: document.getElementById('canvas'),
+      noExitRuntime: true,
       onRuntimeInitialized: function() {
-        /* Loading spinner is hidden from C code via EM_ASM */
         cub3dLoaded = true;
       },
+      onAbort: function(what) {
+        var el = document.getElementById('cub3d-loading');
+        if (el) el.innerHTML = '<span style="color:#ff6060;font-size:1rem">Abort: ' + what + '</span>';
+      },
       print: function(text) { console.log('[cub3D]', text); },
-      printErr: function(text) { console.warn('[cub3D]', text); }
+      printErr: function(text) {
+        console.warn('[cub3D]', text);
+        var el = document.getElementById('cub3d-loading');
+        if (el && el.style.display !== 'none' && /error|abort|exception/i.test(text)) {
+          el.innerHTML = '<span style="color:#ff6060;font-size:1rem">' + text + '</span>';
+        }
+      }
     };
 
     const script = document.createElement('script');
